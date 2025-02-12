@@ -1,19 +1,94 @@
+import { Chess } from "chess.js";
 import { WebSocket } from "ws";
+import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
 
 export class Game {
+    //declaration
     public player1: WebSocket;
     public player2: WebSocket;
-    private board: string;
-    private moves: string[];
+    public board: Chess;
     private startTime: Date;
 
     constructor(player1: WebSocket, player2: WebSocket) {
+        //this.player1 refers to the instance variable (declared earlier)
+        // player1 (the parameter) gets assigned to the instance variable
         this.player1 = player1;
         this.player2 = player2;
-        this.board = "";
-        this.moves = [];
+        this.board = new Chess();
         this.startTime = new Date();
+
+        this.player1.send(JSON.stringify({
+            type: INIT_GAME,
+            payload: {
+                color: "white"
+            }
+        }));
+
+        this.player2.send(JSON.stringify({
+            type: INIT_GAME,
+            payload: {
+                color: "black"
+
+            }
+        }))
 
 
     }
+
+    makeMove(socket: WebSocket, move: {
+        from: string;
+        to: string;
+    }) {
+        if (this.board.history().length % 2 === 0 && socket !== this.player1) {
+            return;
+        }
+        if (this.board.history().length % 2 === 0 && socket !== this.player2) {
+            return;
+        }
+        try {
+            //sockets board changes, we need to emit to other one
+            this.board.move(move);
+
+        } catch (e) {
+            return;
+
+        }
+
+        //check if the game is over
+        if (this.board.isGameOver()) {
+            //this is how we send a message in websockets from the server
+            this.player1.emit(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    winner: this.board.turn() === "w" ? "black" : "white"
+                }
+            }));
+
+            this.player2.emit(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    winner: this.board.turn() === 'w' ? "black" : "white"
+                }
+            }));
+            return;
+        }
+        //if the game is not over we need to emit the move to the other player
+        if (this.board.history().length % 2 === 0) {
+            this.player2.emit(JSON.stringify({
+                type: MOVE,
+                payload: move
+            }))
+        } else {
+            this.player1.emit(JSON.stringify({
+                type: MOVE,
+                payload: move
+            }))
+        }
+
+
+
+        //send the updated board to both the users
+    }
 }
+
+//add time logic
