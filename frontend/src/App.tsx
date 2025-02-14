@@ -1,11 +1,20 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
+import { Landing } from './pages/Landing'
+import { Game } from './pages/Game'
 
 function App() {
 
 
   return (
     <>
-      <button className='bg-red-200'>Join game</button>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<Landing />} />
+          <Route path='/game' element={<Game />} />
+        </Routes>
+      </BrowserRouter>
+
     </>
   )
 }
