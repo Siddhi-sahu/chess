@@ -1,23 +1,29 @@
-// import { useEffect, useState } from "react";
+//websocket apis in browsers
 
-// export const useSocket = () => {
-//     const WS_URL = "http://localhost:8080";
-//     const [socket, setSocket] = useState<WebSocket|null>(null);
+import { useEffect, useState } from "react"
 
-//     const wss = new WebSocket(WS_URL);
+//custom hook
+export const getSocket = () => {
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+    const WS_URL = "ws://localhost:8080";
 
-    
+    useEffect(() => {
+        const ws = new WebSocket(WS_URL);
 
-//     useEffect(()=>{
-//         wss.onopen(setSocket())
+        ws.onopen = () => {
+            setSocket(ws);
+        }
 
+        //disconnection of server should be reflected in react state        
+        ws.onclose = () => {
+            setSocket(null);
+        }
 
-//         return wss.onclose(())w
+        return () => {
+            //close the ws connection on unmount of component
+            ws.close();
+        }
+    }, []);
 
-//     },[])
-
-
-    
-
-//     return socket;
-// }
+    return socket;
+}
