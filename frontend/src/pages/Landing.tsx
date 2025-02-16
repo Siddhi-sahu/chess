@@ -2,6 +2,7 @@
 
 import { useNavigate } from "react-router-dom";
 import ChessBoard from "../assets/chessBoard.jpeg";
+import { Button } from "../components/Button";
 
 export const Landing = () => {
     const navigate = useNavigate();
@@ -15,9 +16,9 @@ export const Landing = () => {
 
 
                 <div className="bg-[#5a3d1e] flex flex-col items-center justify-center text-center p-10 text-gold">
-                    <button className="mb-6 bg-gradient-to-r from-[#c29f59] to-[#e6c37b] text-[#3e260e] font-bold px-8 py-3 rounded-full shadow-lg transition-all hover:scale-105 hover:shadow-xl" onClick={() => navigate("/game")}>
+                    <Button onClick={() => navigate("/game")}>
                         Play Now
-                    </button>
+                    </Button>
                     <h1 className="text-4xl md:text-5xl text-[#f3e2c7] font-bold leading-tight drop-shadow-lg">
                         Play Chess Online
                     </h1>
