@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
+import { Chess } from "chess.js";
 
 const INIT_GAME = "init_game";
 const MOVE = "move";
@@ -9,6 +10,9 @@ const GAME_OVER = "game_over";
 
 export const Game = () => {
     const socket = useSocket();
+    const [chess, setChess] = useState(new Chess());
+    const [board, setBoard] = useState(chess.board());
+    console.log("board", board);
 
 
     useEffect(() => {
@@ -20,12 +24,16 @@ export const Game = () => {
 
             switch (message.type) {
                 case INIT_GAME:
-                    console.log("init game")
-
+                    const newChess = new Chess();
+                    setChess(newChess);
+                    setBoard(newChess.board());
                     break;
 
                 case MOVE:
                     console.log("move");
+                    const move = message.payload;
+                    chess.move(move);
+                    setBoard(chess.board());
                     break;
 
                 case GAME_OVER:
@@ -52,7 +60,10 @@ export const Game = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-8 ">
                 <div className="bg-red-100 col-span-6 m-5 ">
-                    <ChessBoard />
+                    <div className="w-full ">
+
+                        <ChessBoard board={board} />
+                    </div>
 
 
                 </div>
@@ -71,3 +82,5 @@ export const Game = () => {
 
     )
 }
+
+//but where is row and i coming from? are we defining it? what parameters does .map() expects?
