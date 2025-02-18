@@ -12,5 +12,8 @@ export const ChessBoard = () => {
 
     return <div>
         {/* square bloacks */}
+        {board.map((square, i) => {
+
+        })}
     </div>
 }

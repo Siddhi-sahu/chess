@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 
+const WS_URL = "ws://localhost:8080";
 //custom hook
-export const getSocket = () => {
+export const useSocket = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
-    const WS_URL = "ws://localhost:8080";
 
     useEffect(() => {
         const ws = new WebSocket(WS_URL);

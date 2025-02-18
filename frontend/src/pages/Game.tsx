@@ -1,18 +1,51 @@
+import { useEffect } from "react";
 import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
-import { getSocket } from "../hooks/Socket";
+import { useSocket } from "../hooks/Socket";
 
 const INIT_GAME = "init_game";
 const MOVE = "move";
 const GAME_OVER = "game_over";
 
 export const Game = () => {
-    const socket = getSocket();
+    const socket = useSocket();
 
-    if (!socket) return;
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            console.log(message);
+
+            switch (message.type) {
+                case INIT_GAME:
+                    console.log("init game")
+
+                    break;
+
+                case MOVE:
+                    console.log("move");
+                    break;
+
+                case GAME_OVER:
+                    console.log("gameover");
+                    break;
+
+
+                default:
+                    break;
+            }
+        }
+
+    }, [socket])
+
+    if (!socket) return <div>Connecting...</div>;
 
     const handleClick = () => {
-        socket.send(INIT_GAME);
+        socket.send(JSON.stringify({
+            type: INIT_GAME
+        }));
     }
     return (
         <div className="flex w-full max-h-screen items-center justify-center">
