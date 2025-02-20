@@ -1,10 +1,12 @@
-import { Color, PieceSymbol, Square } from "chess.js";
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MOVE } from "../pages/Game";
 
 
 
-export const ChessBoard = ({ board, socket }: {
+export const ChessBoard = ({ setBoard, chess, board, socket }: {
+    setBoard: any,
+    chess: any,
     board: ({
         square: Square;
         type: PieceSymbol;
@@ -16,6 +18,7 @@ export const ChessBoard = ({ board, socket }: {
     const [to, setTo] = useState<Square | null>(null);
 
 
+
     return <div className="bg-white rounded-lg">
         {/* rows */}
         <div className="rounded-lg">
@@ -23,16 +26,29 @@ export const ChessBoard = ({ board, socket }: {
             {board.map((row, i) => {
                 return <div key={i} className="flex">
                     {row.map((square, j) => {
+                        const file = String.fromCharCode(97 + j);
+                        const rank = 8 - i;
+                        const squareRepresentation = `${file}${rank}` as Square;
                         return <div onClick={() => {
                             if (!from) {
-                                setFrom(square?.square ?? null);
+                                setFrom(squareRepresentation);
                             } else {
-                                setTo(square?.square ?? null);
+                                setTo(squareRepresentation);
                                 socket.send(JSON.stringify({
                                     type: MOVE,
+                                    payload: {
+                                        from,
+                                        to: squareRepresentation
+
+                                    }
+                                }));
+                                setFrom(null);
+                                chess.move({ from, to: squareRepresentation });
+                                setBoard(chess.board());
+                                console.log({
                                     from,
                                     to
-                                }))
+                                })
 
                             }
                         }}
@@ -49,6 +65,11 @@ export const ChessBoard = ({ board, socket }: {
                 </div>
             })}
 
+
+
+
+
         </div>
     </div>
+
 }

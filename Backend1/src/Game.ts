@@ -46,9 +46,10 @@ export class Game {
             return;
         }
 
-        // console.log("didnot early return");
+        console.log("didnot early return");
         try {
-            //sockets board changes, we need to emit to other one
+            //sockets board changes, we need to emit to other one only if the move succeeded 
+            // it doesnt succeed when the square is null
             this.board.move(move);
 
         } catch (e) {
