@@ -4,9 +4,9 @@ import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
 import { Chess } from "chess.js";
 
-const INIT_GAME = "init_game";
-const MOVE = "move";
-const GAME_OVER = "game_over";
+export const INIT_GAME = "init_game";
+export const MOVE = "move";
+export const GAME_OVER = "game_over";
 
 export const Game = () => {
     const socket = useSocket();
@@ -56,31 +56,22 @@ export const Game = () => {
         }));
     }
     return (
-        <div className="flex w-full max-h-screen items-center justify-center">
-
-            <div className="grid grid-cols-1 md:grid-cols-8 ">
-                <div className="bg-red-100 col-span-6 m-5 ">
-                    <div className="w-full ">
-
-                        <ChessBoard board={board} />
-                    </div>
-
-
-                </div>
-                <div className="bg-green-200 col-span-2 m-5 ">
-                    <div className="p-10">
-
-                        <Button onClick={handleClick}>
-                            Play Now
-                        </Button>
-                    </div>
-
+        <div className="flex w-full h-screen items-center justify-center bg-[#2a1a0a] p-6">
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-4 w-full max-w-6xl">
+                {/* Chess Board Section */}
+                <div className="bg-[#3e2c19] col-span-6 flex items-center justify-center rounded-lg shadow-lg p-6">
+                    <ChessBoard board={board} socket={socket} />
                 </div>
 
+                {/* Controls Section */}
+                <div className="bg-[#5a3d1e] col-span-2 flex flex-col items-center justify-center rounded-lg shadow-lg p-6 text-white">
+                    {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
+                    <Button onClick={handleClick} >
+                        Play Now
+                    </Button>
+                </div>
             </div>
         </div>
 
     )
 }
-
-//but where is row and i coming from? are we defining it? what parameters does .map() expects?

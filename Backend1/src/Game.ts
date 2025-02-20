@@ -46,7 +46,7 @@ export class Game {
             return;
         }
 
-        console.log("didnot early return");
+        // console.log("didnot early return");
         try {
             //sockets board changes, we need to emit to other one
             this.board.move(move);
@@ -76,21 +76,21 @@ export class Game {
             }));
             return;
         }
-        console.log("game is not over yet")
+        // console.log("game is not over yet")
         //if the game is not over we need to emit the move to the other player
         if (this.board.history().length % 2 === 1) {
-            console.log("player 2 shoulf get the emit")
+            // console.log("player 2 shoulf get the emit")
             this.player2.send(JSON.stringify({
                 type: MOVE,
                 payload: move
             }));
-            console.log("player 2 did get the emit")
+            // console.log("player 2 did get the emit")
         } else {
             this.player1.send(JSON.stringify({
                 type: MOVE,
                 payload: move
             }));
-            console.log("player1 gets the emit")
+            // console.log("player1 gets the emit")
 
         }
 
