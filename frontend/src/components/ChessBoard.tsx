@@ -1,12 +1,13 @@
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MOVE } from "../pages/Game";
+import { Pieces } from "./Pieces";
 
 
 
 export const ChessBoard = ({ setBoard, chess, board, socket }: {
     setBoard: any,
-    chess: any,
+    chess: Chess,
     board: ({
         square: Square;
         type: PieceSymbol;
@@ -37,8 +38,11 @@ export const ChessBoard = ({ setBoard, chess, board, socket }: {
                                 socket.send(JSON.stringify({
                                     type: MOVE,
                                     payload: {
-                                        from,
-                                        to: squareRepresentation
+                                        move: {
+
+                                            from,
+                                            to: squareRepresentation
+                                        }
 
                                     }
                                 }));
@@ -57,7 +61,7 @@ export const ChessBoard = ({ setBoard, chess, board, socket }: {
                             key={j} className={`w-16 h-16 ${(i + j) % 2 === 0 ? "bg-[#5A3D1E]" : "bg-[#2A1A0A] "} text-white flex justify-center items-center`}>
                             <div>
 
-                                {square ? square.type : ""}
+                                {square ? <Pieces square={square} /> : ""}
 
                             </div>
                         </div>
