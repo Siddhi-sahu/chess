@@ -28,14 +28,20 @@ export const Game = () => {
                 case INIT_GAME:
                     const newChess = new Chess();
                     setChess(newChess);
-                    setBoard(newChess.board());
+                    setBoard(chess.board());
                     break;
 
                 case MOVE:
                     console.log("move");
-                    const move = message.payload;
-                    chess.move(move);
-                    setBoard(chess.board());
+                    setChess((prevChess) => {
+                        const newChess = new Chess(prevChess.fen());
+                        const move = newChess.move(message.payload);
+                        if (move) setBoard(chess.board());
+                        return newChess;
+
+                    })
+
+
                     break;
 
                 case GAME_OVER:
@@ -48,7 +54,7 @@ export const Game = () => {
             }
         }
 
-    }, [socket])
+    }, [socket, chess])
 
     if (!socket) return <div>Connecting...</div>;
 
