@@ -5,7 +5,7 @@ import { Pieces } from "./Pieces";
 
 
 
-export const ChessBoard = ({ setBoard, chess, board, socket }: {
+export const ChessBoard = ({ setBoard, chess, board, socket, playerColor }: {
     setBoard: any,
     chess: Chess,
     board: ({
@@ -13,7 +13,8 @@ export const ChessBoard = ({ setBoard, chess, board, socket }: {
         type: PieceSymbol;
         color: Color;
     } | null)[][];
-    socket: WebSocket
+    socket: WebSocket;
+    playerColor: "w" | "b"
 }) => {
     const [from, setFrom] = useState<Square | null>(null);
     const [to, setTo] = useState<Square | null>(null);
@@ -32,9 +33,16 @@ export const ChessBoard = ({ setBoard, chess, board, socket }: {
                         const squareRepresentation = `${file}${rank}` as Square;
                         return <div onClick={() => {
                             if (!from) {
-                                setFrom(squareRepresentation);
+                                if (square && chess.turn() == playerColor) {
+
+                                    setFrom(squareRepresentation);
+                                }
                             } else {
                                 setTo(squareRepresentation);
+                                if (chess.turn() != playerColor) {
+                                    console.log("wrong person trying to move");
+                                    // return;
+                                }
                                 socket.send(JSON.stringify({
                                     type: MOVE,
                                     payload: {

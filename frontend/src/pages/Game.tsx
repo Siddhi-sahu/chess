@@ -14,6 +14,7 @@ export const Game = () => {
     const [chess, setChess] = useState(new Chess());
     //board physical
     const [board, setBoard] = useState(chess.board());
+    const [color, setColor] = useState<"w" | "b">("w");
     console.log("board", board);
 
 
@@ -26,6 +27,7 @@ export const Game = () => {
 
             switch (message.type) {
                 case INIT_GAME:
+                    setColor(message.payload.color);
                     const newChess = new Chess();
                     setChess(newChess);
                     setBoard(chess.board());
@@ -68,7 +70,7 @@ export const Game = () => {
             <div className="grid grid-cols-1 md:grid-cols-8 gap-4 w-full max-w-6xl">
                 {/* Chess Board Section */}
                 <div className="bg-[#3e2c19] col-span-6 flex items-center justify-center rounded-lg shadow-lg p-6">
-                    <ChessBoard setBoard={setBoard} chess={chess} board={board} socket={socket} />
+                    <ChessBoard setBoard={setBoard} chess={chess} board={board} socket={socket} playerColor={color} />
                 </div>
 
                 {/* Controls Section */}
