@@ -15,6 +15,7 @@ export const Game = () => {
     //board physical
     const [board, setBoard] = useState(chess.board());
     const [color, setColor] = useState<"w" | "b">("w");
+    const [started, setStarted] = useState(false);
     console.log("board", board);
 
 
@@ -31,6 +32,7 @@ export const Game = () => {
                     const newChess = new Chess();
                     setChess(newChess);
                     setBoard(chess.board());
+                    setStarted(true);
                     break;
 
                 case MOVE:
@@ -76,9 +78,9 @@ export const Game = () => {
                 {/* Controls Section */}
                 <div className="bg-[#5a3d1e] col-span-2 flex flex-col items-center justify-center rounded-lg shadow-lg p-6 text-white">
                     {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
-                    <Button onClick={handleClick} >
+                    {started === false ? <Button onClick={handleClick} >
                         Play Now
-                    </Button>
+                    </Button> : ""}
                 </div>
             </div>
         </div>

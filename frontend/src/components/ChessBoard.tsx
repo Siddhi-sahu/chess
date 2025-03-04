@@ -41,7 +41,7 @@ export const ChessBoard = ({ setBoard, chess, board, socket, playerColor }: {
                                 setTo(squareRepresentation);
                                 if (chess.turn() != playerColor) {
                                     console.log("wrong person trying to move");
-                                    // return;
+                                    return;
                                 }
                                 socket.send(JSON.stringify({
                                     type: MOVE,
