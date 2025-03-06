@@ -3,6 +3,8 @@ import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
 import { Chess } from "chess.js";
+import { ShowMoves } from "../components/ShowMoves";
+import Picture from "../assets/Screenshot 2025-03-06 144619.png";
 
 export const INIT_GAME = "init_game";
 export const MOVE = "move";
@@ -16,6 +18,7 @@ export const Game = () => {
     const [board, setBoard] = useState(chess.board());
     const [color, setColor] = useState<"w" | "b">("w");
     const [started, setStarted] = useState(false);
+    const [started1, setStarted1] = useState(false);
     console.log("board", board);
 
 
@@ -28,11 +31,13 @@ export const Game = () => {
 
             switch (message.type) {
                 case INIT_GAME:
+                    console.log("game has begin")
                     setColor(message.payload.color);
                     const newChess = new Chess();
                     setChess(newChess);
                     setBoard(chess.board());
                     setStarted(true);
+                    setStarted1(true);
                     break;
 
                 case MOVE:
@@ -66,13 +71,17 @@ export const Game = () => {
         socket.send(JSON.stringify({
             type: INIT_GAME
         }));
+
+        setStarted(true);
+
+        <ShowMoves />
     }
     return (
         <div className="flex w-full h-screen items-center justify-center bg-[#2a1a0a] p-6">
             <div className="grid grid-cols-1 md:grid-cols-8 gap-4 w-full max-w-6xl">
                 {/* Chess Board Section */}
                 <div className="bg-[#3e2c19] col-span-6 flex items-center justify-center rounded-lg shadow-lg p-6">
-                    <ChessBoard setBoard={setBoard} chess={chess} board={board} socket={socket} playerColor={color} />
+                    {started1 === false ? <img src={Picture} /> : <ChessBoard setBoard={setBoard} chess={chess} board={board} socket={socket} playerColor={color} />}
                 </div>
 
                 {/* Controls Section */}
