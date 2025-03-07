@@ -1,6 +1,6 @@
 import { Chess } from "chess.js";
 import { WebSocket } from "ws";
-import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
+import { BOARD, GAME_OVER, INIT_GAME, MOVE } from "./messages";
 
 export class Game {
     //declaration
@@ -99,6 +99,19 @@ export class Game {
 
 
         //send the updated board to both the users
+
+        this.player1.send(JSON.stringify({
+            type: BOARD,
+            payload: this.board.board()
+        }));
+
+        this.player2.send(JSON.stringify({
+            type: BOARD,
+            payload: this.board.board()
+        }));
+
+        console.log("board from backend", this.board.board());
+        return;
     }
 }
 

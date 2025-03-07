@@ -9,6 +9,7 @@ import Picture from "../assets/Screenshot 2025-03-06 144619.png";
 export const INIT_GAME = "init_game";
 export const MOVE = "move";
 export const GAME_OVER = "game_over";
+export const BOARD = "board";
 
 export const Game = () => {
     const socket = useSocket();
@@ -50,6 +51,12 @@ export const Game = () => {
 
                     })
 
+
+                    break;
+
+                case BOARD:
+                    console.log("message : ", message);
+                    setBoard(message.payload);
 
                     break;
 
