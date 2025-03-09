@@ -1,5 +1,7 @@
 //ws server
 
+//todo: clear interval
+
 import { WebSocketServer } from "ws";
 import { GameManager } from "./GameManager";
 

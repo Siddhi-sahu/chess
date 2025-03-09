@@ -1,6 +1,7 @@
 import { Chess } from "chess.js";
 import { WebSocket } from "ws";
-import { BOARD, GAME_OVER, INIT_GAME, MOVE } from "./messages";
+import { BOARD, GAME_OVER, INIT_GAME, MOVE, TIME } from "./messages";
+
 
 export class Game {
     //declaration
@@ -8,6 +9,8 @@ export class Game {
     public player2: WebSocket;
     public board: Chess;
     // private startTime: Date;
+    public blackTime = 300;
+    public whiteTime = 300;
 
     constructor(player1: WebSocket, player2: WebSocket) {
         //this.player1 refers to the instance variable (declared earlier)
@@ -52,6 +55,7 @@ export class Game {
             //sockets board changes, we need to emit to other one only if the move succeeded 
             // it doesnt succeed when the square is null
             this.board.move(move);
+            // console.log(this.startTime)
 
         } catch (e) {
             console.log(e)
@@ -85,6 +89,7 @@ export class Game {
             this.player2.send(JSON.stringify({
                 type: MOVE,
                 payload: move
+
             }));
             // console.log("player 2 did get the emit")
         } else {
@@ -110,9 +115,37 @@ export class Game {
             payload: this.board.board()
         }));
 
-        console.log("board from backend", this.board.board());
+        // console.log("board from backend", this.board.board());
+
+        //add time logic when the game starts they both have same time, which passes every min if they dont move, when moves the clock stops and other persons clock runs
+        //send from backend for the other person because for the user itself we can make the changes in the frontend
+
+        setInterval(() => {
+            if (this.board.history().length % 2 === 1) {
+                this.whiteTime -= 1;
+
+                this.player2.send(JSON.stringify({
+                    type: TIME,
+                    payload: this.whiteTime
+
+                }));
+                // console.log("player 2 did get the emit")
+            } else {
+                this.blackTime -= 1;
+                this.player1.send(JSON.stringify({
+                    type: TIME,
+                    payload: this.blackTime
+                }));
+                // console.log("player1 gets the emit")
+
+            }
+        }, 1000)
+
+
         return;
+
+
+
+
     }
 }
-
-//add time logic

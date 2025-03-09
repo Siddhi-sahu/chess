@@ -17,55 +17,18 @@ export const ChessBoard = ({ setBoard, chess, board, socket, playerColor }: {
     playerColor: "w" | "b"
 }) => {
     const [from, setFrom] = useState<Square | null>(null);
-    // const [to, setTo] = useState<Square | null>(null);
-    // const [refresh, setRefresh] = useState(0);
 
-    // useEffect(() => {
-
-    //     const interval = setInterval(() => {
-    //         chess.loadPgn(chess.pgn());
-    //         setBoard(chess.board());
-    //         setRefresh((prev) => prev + 1);
-    //     }, 2000);
-    //     console.log("ran");
-
-
-    //     return () => {
-    //         clearInterval(interval);
-
-
-    //     }
-
-    // }, [socket]);
-
-    // socket.onmessage = (event) => {
-
-    //     const message = JSON.parse(event.data);
-    //     if (message.type == MOVE) {
-    //         const move = message.payload;
-    //         if (!move || !move.from || !move.to) {
-    //             console.log("invalid move ", move);
-    //             return;
-    //         };
-    //         chess.loadPgn(chess.pgn());
-    //         const result = chess.move(move);
-    //         if (!result) {
-    //             console.log("mmove rejected by chess.js ", move);
-    //             return;
-    //         }
-
-    //         setBoard(chess.board());
-    //         console.log("Updated board. next turn is ofś", chess.turn());
-
-
-    //     };
+    // const [gameon, setGameon] = useState(false);
+    // const [bStartTime, bSetStartTime] = useState(false);
+    // const [wStartTime, wSetStartTime] = useState(false);
 
 
 
-    // }
+
 
 
     return <div className="bg-white rounded-lg">
+
         {/* rows */}
         <div className="rounded-lg">
 
@@ -96,6 +59,7 @@ export const ChessBoard = ({ setBoard, chess, board, socket, playerColor }: {
                                     return;
                                 }
                                 // chess.move({ from, to: moveTo });
+                                //here player clock should stop and other player clock should start
                                 socket.send(JSON.stringify({
                                     type: MOVE,
                                     payload: {
@@ -107,7 +71,9 @@ export const ChessBoard = ({ setBoard, chess, board, socket, playerColor }: {
 
                                     }
                                 }));
-                                console.log("to clicked")
+                                console.log("to clicked");
+                                // setGameon(true);
+
                                 setFrom(null);
                                 setBoard(chess.board());
                                 console.log({ from, to: moveTo, turn: chess.turn() });
