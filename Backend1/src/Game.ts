@@ -11,6 +11,7 @@ export class Game {
     // private startTime: Date;
     public blackTime = 300;
     public whiteTime = 300;
+    public interval: NodeJS.Timeout | null = null;
 
     constructor(player1: WebSocket, player2: WebSocket) {
         //this.player1 refers to the instance variable (declared earlier)
@@ -19,6 +20,7 @@ export class Game {
         this.player2 = player2;
         this.board = new Chess();
         // this.startTime = new Date();
+        // this.interval = this.interval;
 
         this.player1.send(JSON.stringify({
             type: INIT_GAME,
@@ -55,7 +57,7 @@ export class Game {
             //sockets board changes, we need to emit to other one only if the move succeeded 
             // it doesnt succeed when the square is null
             this.board.move(move);
-            // console.log(this.startTime)
+            this.timer();
 
         } catch (e) {
             console.log(e)
@@ -114,14 +116,21 @@ export class Game {
             type: BOARD,
             payload: this.board.board()
         }));
-
         // console.log("board from backend", this.board.board());
 
-        //add time logic when the game starts they both have same time, which passes every min if they dont move, when moves the clock stops and other persons clock runs
-        //send from backend for the other person because for the user itself we can make the changes in the frontend
 
-        setInterval(() => {
-            if (this.board.history().length % 2 === 1) {
+        return;
+
+    }
+
+    timer() {
+        if (this.interval) clearInterval(this.interval);
+        //attach interval with this game itself like this.interval
+        this.interval = setInterval(() => {
+            //add time logic when the game starts they both have same time, which passes every sec if they dont move, when moves the clock stops and other persons clock runs
+            //send from backend for the other person because for the user itself we can make the changes in the frontend
+
+            if (this.board.history().length % 2 === 0) {
                 this.whiteTime -= 1;
 
                 this.player2.send(JSON.stringify({
@@ -130,7 +139,7 @@ export class Game {
 
                 }));
                 // console.log("player 2 did get the emit")
-            } else {
+            } else if (this.board.history().length % 2 === 1) {
                 this.blackTime -= 1;
                 this.player1.send(JSON.stringify({
                     type: TIME,
@@ -140,12 +149,6 @@ export class Game {
 
             }
         }, 1000)
-
-
-        return;
-
-
-
 
     }
 }

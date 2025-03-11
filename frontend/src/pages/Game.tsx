@@ -21,34 +21,34 @@ export const Game = () => {
     const [color, setColor] = useState<"w" | "b">("w");
     const [started, setStarted] = useState(false);
     const [started1, setStarted1] = useState(false);
-    const [whiteTime, setWhiteTime] = useState(600);
-    const [blackTime, setBlackTime] = useState(600);
+    // const [whiteTime, setWhiteTime] = useState(600);
+    // const [blackTime, setBlackTime] = useState(600);
     const [turn, setTurn] = useState<"w" | "b" | null>(null);
     console.log("board", board);
-    // let whiteTime: number = 300;
-    // let blackTime = 300;
+    let whiteTime: number = 600;
+    let blackTime = 600;
 
-    // useEffect(() => {
-    //     const timeout = setInterval(() => {
+    useEffect(() => {
+        const timeout = setInterval(() => {
 
-    //         if (started1 && color === "w") {
-    //             whiteTime = whiteTime - 1;
-    //             console.log("whitetime:", whiteTime);
-    //             console.log("bklacktime:", blackTime);
+            if (started1 && color === "w") {
+                whiteTime = whiteTime - 1;
+                console.log("whitetime:", whiteTime);
+                console.log("bklacktime:", blackTime);
 
-    //         } else if (started1 && color === "b") {
-    //             blackTime -= 1;
-    //             console.log("bklacktime:", blackTime);
-    //             console.log("whitetime:", whiteTime);
+            } else if (started1 && color === "b") {
+                blackTime -= 1;
+                console.log("bklacktime:", blackTime);
+                console.log("whitetime:", whiteTime);
 
 
-    //         }
+            }
 
-    //     }, 1000);
+        }, 1000);
 
-    //     return () => clearInterval(timeout);
+        return () => clearInterval(timeout);
 
-    // }, [started1, color])
+    }, [started1, color])
 
 
     useEffect(() => {
@@ -76,7 +76,6 @@ export const Game = () => {
                         const newChess = new Chess(prevChess.fen());
                         const move = newChess.move(message.payload);
                         if (move) setBoard(chess.board());
-
                         return newChess;
 
                     })
