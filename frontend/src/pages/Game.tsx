@@ -21,34 +21,15 @@ export const Game = () => {
     const [color, setColor] = useState<"w" | "b">("w");
     const [started, setStarted] = useState(false);
     const [started1, setStarted1] = useState(false);
-    // const [whiteTime, setWhiteTime] = useState(600);
-    // const [blackTime, setBlackTime] = useState(600);
-    const [turn, setTurn] = useState<"w" | "b" | null>(null);
+    let [whiteTime, setWhiteTime] = useState(300);
+    let [blackTime, setBlackTime] = useState(300);
+    let [displaywhiteTime, setDisplayWhiteTime] = useState(300);
+    let [displayblackTime, setDisplayBlackTime] = useState(300);
+    // const [timeout, setTimeout] = useState<NodeJS.Timer | null>(null);
+    // const [currentTurn, setCurrentTurn] = useState<"w" | "b" | null>(null);
     console.log("board", board);
-    let whiteTime: number = 600;
-    let blackTime = 600;
+    let timerHandle: any = null;
 
-    useEffect(() => {
-        const timeout = setInterval(() => {
-
-            if (started1 && color === "w") {
-                whiteTime = whiteTime - 1;
-                console.log("whitetime:", whiteTime);
-                console.log("bklacktime:", blackTime);
-
-            } else if (started1 && color === "b") {
-                blackTime -= 1;
-                console.log("bklacktime:", blackTime);
-                console.log("whitetime:", whiteTime);
-
-
-            }
-
-        }, 1000);
-
-        return () => clearInterval(timeout);
-
-    }, [started1, color])
 
 
     useEffect(() => {
@@ -67,7 +48,7 @@ export const Game = () => {
                     setBoard(chess.board());
                     setStarted(true);
                     setStarted1(true);
-                    setTurn("w");
+                    // setCurrentTurn("w");
                     break;
 
                 case MOVE:
@@ -76,6 +57,8 @@ export const Game = () => {
                         const newChess = new Chess(prevChess.fen());
                         const move = newChess.move(message.payload);
                         if (move) setBoard(chess.board());
+
+                        newChess.turn() === "b" ? setBlackTime((prev) => Math.min(message.payload.blackTime, prev)) : setWhiteTime((prev) => Math.min(message.payload.blackTime, prev))
                         return newChess;
 
                     })
@@ -90,11 +73,13 @@ export const Game = () => {
                     break;
                 case TIME:
                     console.log("time");
+                    setBlackTime((prev) => Math.min(message.payload.blackTime, prev));
+                    setWhiteTime((prev) => Math.min(message.payload.whiteTime, prev));
                     break;
 
 
                 case GAME_OVER:
-                    console.log("gameover");
+                    console.log("gameover, winner: ", message.payload.winner);
                     break;
 
 
@@ -104,7 +89,50 @@ export const Game = () => {
             }
         }
 
-    }, [socket, chess])
+    }, [socket, chess]);
+
+    const timer = () => {
+        stop();
+
+        timerHandle = setInterval(() => {
+
+            if (started1 && color === "w") {
+                if (displaywhiteTime > 0) setDisplayWhiteTime((prev) => Math.min(displaywhiteTime - 1, prev));
+                console.log("displaywhitetime:", displaywhiteTime);
+                console.log("displaybklacktime:", displayblackTime);
+                console.log("bklacktime:", blackTime);
+                console.log("whitetime:", whiteTime);
+
+            } else if (started1 && color === "b") {
+                if (displayblackTime > 0) setDisplayBlackTime((prev) => Math.min(displayblackTime - 1, prev));
+                console.log("displaywhitetime:", displaywhiteTime);
+                console.log("displaybklacktime:", displayblackTime);
+                console.log("bklacktime:", blackTime);
+                console.log("whitetime:", whiteTime);
+
+
+            }
+
+        }, 1000);
+
+    }
+
+    const stop = () => {
+        if (timerHandle) clearInterval(timerHandle);
+
+    }
+
+
+    useEffect(() => {
+        timer();
+
+
+        return () => {
+            timerHandle = null;
+
+        }
+
+    }, [started1, color, whiteTime, blackTime])
 
     if (!socket) return <div>Connecting...</div>;
 
@@ -134,8 +162,9 @@ export const Game = () => {
                 <div className="bg-[#5a3d1e] col-span-2 flex flex-col items-center justify-center rounded-lg shadow-lg p-6 text-white">
                     {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
                     {started1 === true ? <div><h2 className="text-xl font-semibold mb-4">Timer</h2>
-                        <p>White: {whiteTime}s</p>
-                        <p>Black: {blackTime}s</p>
+                        {/* <p>{turn === "w" ? Math.max(whiteTime, 0) }</p> */}
+                        <p>White: {displaywhiteTime > 0 && displaywhiteTime}s</p>
+                        <p>Black: {displayblackTime > 0 && displayblackTime}s</p>
                     </div> : ""}
                     {started === false ? <Button onClick={handleClick} >
                         Play Now

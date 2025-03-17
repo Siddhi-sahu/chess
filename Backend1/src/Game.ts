@@ -130,22 +130,56 @@ export class Game {
             //add time logic when the game starts they both have same time, which passes every sec if they dont move, when moves the clock stops and other persons clock runs
             //send from backend for the other person because for the user itself we can make the changes in the frontend
 
+
+
             if (this.board.history().length % 2 === 0) {
-                this.whiteTime -= 1;
+                while (this.whiteTime > 0) {
+                    this.whiteTime -= 1;
+                    this.player2.send(JSON.stringify({
+                        type: TIME,
+                        payload: this.whiteTime
 
-                this.player2.send(JSON.stringify({
-                    type: TIME,
-                    payload: this.whiteTime
+                    }));
 
-                }));
+                }
+
+                if (this.whiteTime <= 0) {
+
+                    this.player1.send(JSON.stringify({
+                        type: GAME_OVER,
+                        payload: {
+                            winner: "b"
+                        }
+                    }))
+
+                }
+
+
+
+
                 // console.log("player 2 did get the emit")
             } else if (this.board.history().length % 2 === 1) {
-                this.blackTime -= 1;
-                this.player1.send(JSON.stringify({
-                    type: TIME,
-                    payload: this.blackTime
-                }));
-                // console.log("player1 gets the emit")
+                while (this.blackTime > 0) {
+                    this.blackTime -= 1;
+                    this.player1.send(JSON.stringify({
+                        type: TIME,
+                        payload: this.blackTime
+                    }));
+                    // console.log("player1 gets the emit")
+
+                };
+
+                if (this.blackTime <= 0) {
+
+                    this.player1.send(JSON.stringify({
+                        type: GAME_OVER,
+                        payload: {
+                            winner: "w"
+                        }
+                    }))
+
+                }
+
 
             }
         }, 1000)
