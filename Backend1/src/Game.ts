@@ -9,8 +9,8 @@ export class Game {
     public player2: WebSocket;
     public board: Chess;
     // private startTime: Date;
-    public blackTime = 300;
-    public whiteTime = 300;
+    public blackTime;
+    public whiteTime;
     public interval: NodeJS.Timeout | null = null;
 
     constructor(player1: WebSocket, player2: WebSocket) {
@@ -21,6 +21,8 @@ export class Game {
         this.board = new Chess();
         // this.startTime = new Date();
         // this.interval = this.interval;
+        this.blackTime = 300;
+        this.whiteTime = 300;
 
         this.player1.send(JSON.stringify({
             type: INIT_GAME,
@@ -45,6 +47,9 @@ export class Game {
         to: string;
     }) {
         console.log(move);
+        if (this.board.history().length === 1) {
+            this.timer();
+        }
         if (this.board.history().length % 2 === 0 && socket !== this.player1) {
             return;
         }
@@ -57,7 +62,7 @@ export class Game {
             //sockets board changes, we need to emit to other one only if the move succeeded 
             // it doesnt succeed when the square is null
             this.board.move(move);
-            this.timer();
+            // this.timer();
 
         } catch (e) {
             console.log(e)
@@ -124,64 +129,89 @@ export class Game {
     }
 
     timer() {
-        if (this.interval) clearInterval(this.interval);
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null
+
+        }
         //attach interval with this game itself like this.interval
         this.interval = setInterval(() => {
             //add time logic when the game starts they both have same time, which passes every sec if they dont move, when moves the clock stops and other persons clock runs
             //send from backend for the other person because for the user itself we can make the changes in the frontend
 
-
-
+            //0 moves = white turn ==0
+            //1 moves = black turn ==1
+            //2 moves = white turn ==0
+            //3 moves = black turn ==1
             if (this.board.history().length % 2 === 0) {
-                while (this.whiteTime > 0) {
+                if (this.whiteTime > 0) {
                     this.whiteTime -= 1;
-                    this.player2.send(JSON.stringify({
-                        type: TIME,
-                        payload: this.whiteTime
+                } else {
+                    if (this.interval) {
 
-                    }));
-
-                }
-
-                if (this.whiteTime <= 0) {
+                        clearInterval(this.interval);
+                    }
 
                     this.player1.send(JSON.stringify({
                         type: GAME_OVER,
                         payload: {
                             winner: "b"
                         }
-                    }))
+                    }));
+                    this.player2.send(JSON.stringify({
+                        type: GAME_OVER,
+                        payload: {
+                            winner: "b"
+                        }
+                    }));
+                    return;
 
                 }
 
 
 
-
-                // console.log("player 2 did get the emit")
-            } else if (this.board.history().length % 2 === 1) {
-                while (this.blackTime > 0) {
+            } else {
+                if (this.blackTime > 0) {
                     this.blackTime -= 1;
-                    this.player1.send(JSON.stringify({
-                        type: TIME,
-                        payload: this.blackTime
-                    }));
-                    // console.log("player1 gets the emit")
+                } else {
+                    if (this.interval) {
 
-                };
-
-                if (this.blackTime <= 0) {
-
+                        clearInterval(this.interval);
+                    }
                     this.player1.send(JSON.stringify({
                         type: GAME_OVER,
                         payload: {
                             winner: "w"
                         }
                     }))
+                    this.player2.send(JSON.stringify({
+                        type: GAME_OVER,
+                        payload: {
+                            winner: "w"
+                        }
+                    }));
 
-                }
+                    return;
 
+                };
 
             }
+            this.player1.send(JSON.stringify({
+                type: TIME,
+                payload: {
+                    whiteTime: this.whiteTime,
+                    blackTime: this.blackTime,
+
+                }
+            }));
+            this.player2.send(JSON.stringify({
+                type: TIME,
+                payload: {
+                    whiteTime: this.whiteTime,
+                    blackTime: this.blackTime,
+
+                }
+            }));
         }, 1000)
 
     }

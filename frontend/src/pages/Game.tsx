@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
@@ -23,12 +23,10 @@ export const Game = () => {
     const [started1, setStarted1] = useState(false);
     let [whiteTime, setWhiteTime] = useState(300);
     let [blackTime, setBlackTime] = useState(300);
-    let [displaywhiteTime, setDisplayWhiteTime] = useState(300);
-    let [displayblackTime, setDisplayBlackTime] = useState(300);
-    // const [timeout, setTimeout] = useState<NodeJS.Timer | null>(null);
-    // const [currentTurn, setCurrentTurn] = useState<"w" | "b" | null>(null);
-    console.log("board", board);
-    let timerHandle: any = null;
+    // console.log("board", board);
+
+    //store timer; ques => wont this be reinitialized to null on rerenders??
+    let timerInterval = useRef<NodeJS.Timeout | null>(null);;
 
 
 
@@ -48,20 +46,34 @@ export const Game = () => {
                     setBoard(chess.board());
                     setStarted(true);
                     setStarted1(true);
-                    // setCurrentTurn("w");
+                    starttimer();
                     break;
 
                 case MOVE:
                     console.log("move");
-                    setChess((prevChess) => {
-                        const newChess = new Chess(prevChess.fen());
-                        const move = newChess.move(message.payload);
-                        if (move) setBoard(chess.board());
+                    try {
 
-                        newChess.turn() === "b" ? setBlackTime((prev) => Math.min(message.payload.blackTime, prev)) : setWhiteTime((prev) => Math.min(message.payload.blackTime, prev))
-                        return newChess;
+                        setChess((prevChess) => {
+                            const newChess = new Chess(prevChess.fen());
+                            const move = newChess.move(message.payload);
+                            if (move) setBoard(chess.board());
 
-                    })
+                            return newChess;
+
+                        });
+
+                        //when a move is made the current playerstimer sould stop and mext players should start
+                        stopTimer();
+                        starttimer();
+
+
+
+
+
+                    } catch (e) {
+                        console.log("error maving move", e)
+                    }
+
 
 
                     break;
@@ -73,13 +85,26 @@ export const Game = () => {
                     break;
                 case TIME:
                     console.log("time");
-                    setBlackTime((prev) => Math.min(message.payload.blackTime, prev));
-                    setWhiteTime((prev) => Math.min(message.payload.whiteTime, prev));
+                    //stop local timer?
+                    stopTimer();
+
+                    setBlackTime(message.payload.blackTime);
+
+                    setWhiteTime(message.payload.whiteTime);
+
+                    //start local timer? ;; with updated state
+
+                    setTimeout(() => {
+                        starttimer();
+
+                    }, 10)
                     break;
 
 
                 case GAME_OVER:
                     console.log("gameover, winner: ", message.payload.winner);
+                    stopTimer();
+                    timerInterval.current = null;
                     break;
 
 
@@ -91,48 +116,60 @@ export const Game = () => {
 
     }, [socket, chess]);
 
-    const timer = () => {
-        stop();
+    const starttimer = () => {
+        //if a timer exists we need to null it
+        if (timerInterval.current) return;
 
-        timerHandle = setInterval(() => {
-
-            if (started1 && color === "w") {
-                if (displaywhiteTime > 0) setDisplayWhiteTime((prev) => Math.min(displaywhiteTime - 1, prev));
-                console.log("displaywhitetime:", displaywhiteTime);
-                console.log("displaybklacktime:", displayblackTime);
-                console.log("bklacktime:", blackTime);
-                console.log("whitetime:", whiteTime);
-
-            } else if (started1 && color === "b") {
-                if (displayblackTime > 0) setDisplayBlackTime((prev) => Math.min(displayblackTime - 1, prev));
-                console.log("displaywhitetime:", displaywhiteTime);
-                console.log("displaybklacktime:", displayblackTime);
-                console.log("bklacktime:", blackTime);
-                console.log("whitetime:", whiteTime);
+        timerInterval.current = setInterval(() => {
+            //When setInterval runs after the WebSocket update, it sees prevWhite = 250 and does nothing because the time is already correct.
+            //only update frontend timer if the websocket b.e. hadnt done it yet
 
 
-            }
+            setWhiteTime((preWhite) => {
+                if (chess.turn() === "w" && preWhite > 0) {
+                    return preWhite - 1;
+                }
+
+
+                return preWhite;
+            })
+            setBlackTime((prevBlack) => {
+                if (chess.turn() === "b" && prevBlack > 0) {
+                    return prevBlack - 1;
+
+                }
+
+
+                return prevBlack;
+            })
+
+            console.log("bklacktime:", blackTime);
+            console.log("whitetime:", whiteTime);
+
 
         }, 1000);
 
     }
 
-    const stop = () => {
-        if (timerHandle) clearInterval(timerHandle);
+    const stopTimer = () => {
+        if (timerInterval.current) {
+            clearInterval(timerInterval.current);
+
+            timerInterval.current = null;
+        }
 
     }
 
 
     useEffect(() => {
-        timer();
+        starttimer();
 
 
         return () => {
-            timerHandle = null;
-
+            stopTimer();
         }
 
-    }, [started1, color, whiteTime, blackTime])
+    }, [started1])
 
     if (!socket) return <div>Connecting...</div>;
 
@@ -163,8 +200,8 @@ export const Game = () => {
                     {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
                     {started1 === true ? <div><h2 className="text-xl font-semibold mb-4">Timer</h2>
                         {/* <p>{turn === "w" ? Math.max(whiteTime, 0) }</p> */}
-                        <p>White: {displaywhiteTime > 0 && displaywhiteTime}s</p>
-                        <p>Black: {displayblackTime > 0 && displayblackTime}s</p>
+                        <p>White: {Math.trunc(whiteTime / 60) + " : " + (whiteTime % 60)}</p>
+                        <p>Black: {Math.trunc(blackTime / 60) + " : " + (blackTime % 60)}</p>
                     </div> : ""}
                     {started === false ? <Button onClick={handleClick} >
                         Play Now
