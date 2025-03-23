@@ -21,8 +21,8 @@ export class Game {
         this.board = new Chess();
         // this.startTime = new Date();
         // this.interval = this.interval;
-        this.blackTime = 300;
-        this.whiteTime = 300;
+        this.blackTime = 60;
+        this.whiteTime = 60;
 
         this.player1.send(JSON.stringify({
             type: INIT_GAME,

@@ -3,8 +3,10 @@ import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
 import { Chess } from "chess.js";
-// import { ShowMoves } from "../components/ShowMoves";
 import Picture from "../assets/Screenshot 2025-03-06 144619.png";
+import Confetti from "react-confetti";
+import { useWindowSize } from 'react-use';
+
 
 export const INIT_GAME = "init_game";
 export const MOVE = "move";
@@ -21,9 +23,11 @@ export const Game = () => {
     const [color, setColor] = useState<"w" | "b">("w");
     const [started, setStarted] = useState(false);
     const [started1, setStarted1] = useState(false);
-    const [whiteTime, setWhiteTime] = useState(300);
-    const [blackTime, setBlackTime] = useState(300);
+    const [whiteTime, setWhiteTime] = useState(60);
+    const [blackTime, setBlackTime] = useState(60);
+    const [winner, setWinner] = useState(null);
     // console.log("board", board);
+    const { height, width } = useWindowSize()
 
     //store timer; ques => wont this be reinitialized to null on rerenders??
     let timerInterval = useRef<NodeJS.Timeout | null>(null);;
@@ -116,6 +120,8 @@ export const Game = () => {
                     console.log("gameover, winner: ", message.payload.winner);
                     stopTimer();
                     timerInterval.current = null;
+
+                    setWinner(message.payload.winner);
                     break;
 
 
@@ -211,7 +217,6 @@ export const Game = () => {
                 {/* Controls Section */}
 
                 <div className="bg-[#5a3d1e] col-span-2 flex flex-col items-center justify-center rounded-lg shadow-lg p-6 text-white">
-                    {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
                     {started1 === true ? <div><h2 className="text-xl font-semibold mb-4">Timer</h2>
                         {/* <p>{turn === "w" ? Math.max(whiteTime, 0) }</p> */}
                         <p>White: {Math.trunc(whiteTime / 60) + " : " + (whiteTime % 60).toString().padStart(2, "0")}</p>
@@ -220,6 +225,10 @@ export const Game = () => {
                     {started === false ? <Button onClick={handleClick} >
                         Play Now
                     </Button> : ""}
+
+                    {winner && <Confetti width={width} height={height} />}
+
+                    {winner && <div><h2 className="text-xl font-semibold mb-4">{winner === "w" ? "White Wins" : "Black Wins"}🏆</h2></div>}
 
 
                 </div>

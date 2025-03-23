@@ -13,8 +13,10 @@
     "@tailwindcss/vite": "^4.0.6",
     "chess.js": "^1.0.0",
     "react": "^19.0.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
+    "react-use": "^17.6.0",
     "tailwindcss": "^4.0.6"
   },
   "devDependencies": {
