@@ -3,7 +3,7 @@ import { Button } from "../components/Button";
 import { ChessBoard } from "../components/ChessBoard";
 import { useSocket } from "../hooks/Socket";
 import { Chess } from "chess.js";
-import { ShowMoves } from "../components/ShowMoves";
+// import { ShowMoves } from "../components/ShowMoves";
 import Picture from "../assets/Screenshot 2025-03-06 144619.png";
 
 export const INIT_GAME = "init_game";
@@ -21,8 +21,8 @@ export const Game = () => {
     const [color, setColor] = useState<"w" | "b">("w");
     const [started, setStarted] = useState(false);
     const [started1, setStarted1] = useState(false);
-    let [whiteTime, setWhiteTime] = useState(300);
-    let [blackTime, setBlackTime] = useState(300);
+    const [whiteTime, setWhiteTime] = useState(300);
+    const [blackTime, setBlackTime] = useState(300);
     // console.log("board", board);
 
     //store timer; ques => wont this be reinitialized to null on rerenders??
@@ -43,11 +43,17 @@ export const Game = () => {
                     setColor(message.payload.color);
                     const newChess = new Chess();
                     setChess(newChess);
-                    setBoard(chess.board());
+                    setBoard(newChess.board());
                     setStarted(true);
                     setStarted1(true);
+                    //send time message to the socket backenf
+                    socket.send(JSON.stringify({
+                        type: TIME
+                    }))
+
                     starttimer();
                     break;
+
 
                 case MOVE:
                     console.log("move");
@@ -63,13 +69,14 @@ export const Game = () => {
                         });
 
                         //when a move is made the current playerstimer sould stop and mext players should start
-                        stopTimer();
-                        starttimer();
+                        if (timerInterval.current) {
 
+                            stopTimer();
+                        }
+                        if (!timerInterval.current) {
+                            starttimer();
 
-
-
-
+                        }
                     } catch (e) {
                         console.log("error maving move", e)
                     }
@@ -94,10 +101,14 @@ export const Game = () => {
 
                     //start local timer? ;; with updated state
 
-                    setTimeout(() => {
-                        starttimer();
+                    if (!timerInterval.current) {
+                        setTimeout(() => {
+                            starttimer();
 
-                    }, 10)
+                        }, 20)
+
+                    }
+
                     break;
 
 
@@ -162,7 +173,10 @@ export const Game = () => {
 
 
     useEffect(() => {
-        starttimer();
+        if (started1 && !timerInterval.current) {
+            starttimer();
+
+        }
 
 
         return () => {
@@ -182,7 +196,7 @@ export const Game = () => {
 
         setStarted(true);
 
-        <ShowMoves />
+        // <ShowMoves />
     }
     return (
         <div className="flex w-full h-screen items-center justify-center bg-[#2a1a0a] p-6">
@@ -200,8 +214,8 @@ export const Game = () => {
                     {/* <h2 className="text-xl font-semibold mb-4">Game Controls</h2> */}
                     {started1 === true ? <div><h2 className="text-xl font-semibold mb-4">Timer</h2>
                         {/* <p>{turn === "w" ? Math.max(whiteTime, 0) }</p> */}
-                        <p>White: {Math.trunc(whiteTime / 60) + " : " + (whiteTime % 60)}</p>
-                        <p>Black: {Math.trunc(blackTime / 60) + " : " + (blackTime % 60)}</p>
+                        <p>White: {Math.trunc(whiteTime / 60) + " : " + (whiteTime % 60).toString().padStart(2, "0")}</p>
+                        <p>Black: {Math.trunc(blackTime / 60) + " : " + (blackTime % 60).toString().padStart(2, "0")}</p>
                     </div> : ""}
                     {started === false ? <Button onClick={handleClick} >
                         Play Now

@@ -47,9 +47,9 @@ export class Game {
         to: string;
     }) {
         console.log(move);
-        if (this.board.history().length === 1) {
-            this.timer();
-        }
+        // if (this.board.history().length === 1) {
+        //     this.timer();
+        // }
         if (this.board.history().length % 2 === 0 && socket !== this.player1) {
             return;
         }
